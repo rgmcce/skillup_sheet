@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>臨床工学室 スキルアップシート</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0f4c75;
+      --primary-light: #1b6ca8;
+      --accent: #00b4d8;
+      --accent-soft: #e0f4f9;
+      --bg: #f0f4f8;
+      --card-bg: #ffffff;
+      --text: #1a2332;
+      --text-muted: #3d4f63;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --warning: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .app-header {
+      background: var(--primary);
+      color: white;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .app-header h1 {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin: 0;
+    }
+
+    /* Tab Navigation */
+    .tab-bar {
+      background: var(--primary-light);
+      display: flex;
+      gap: 2px;
+      padding: 0 24px;
+    }
+
+    .tab-btn {
+      padding: 10px 20px;
+      font-size: 15px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.85);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+      font-family: 'Noto Sans JP', sans-serif;
+    }
+
+    .tab-btn:hover {
+      color: white;
+    }
+
+    .tab-btn.active {
+      color: white;
+      border-bottom-color: var(--accent);
+    }
+
+    /* Main content */
+    .main-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    /* Staff selector */
+    .staff-selector-bar {
+      background: white;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+      border: 1px solid var(--border);
+    }
+
+    .staff-selector-bar label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--primary);
+      white-space: nowrap;
+    }
+
+    .staff-select {
+      flex: 1;
+      max-width: 300px;
+      padding: 8px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'Noto Sans JP', sans-serif;
+      color: var(--text);
+      background: white;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .staff-select:focus {
+      border-color: var(--accent);
+    }
+
+    /* Section header */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      margin-top: 8px;
+    }
+
+    .section-badge {
+      background: var(--primary);
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.06em;
+    }
+
+    .section-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .section-year {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+
+    /* Cards grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .cards-grid-wide {
+      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    }
+
+    /* Card */
+    .info-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 16px 18px;
+      position: relative;
+      transition: box-shadow 0.2s, opacity 0.2s;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .info-card:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .info-card.loading-card {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .card-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-label-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .card-content {
+      font-size: 16px;
+      line-height: 1.75;
+      color: var(--text);
+      min-height: 32px;
+      word-break: break-all;
+    }
+
+    .card-content.empty {
+      color: var(--text-muted);
+      font-style: italic;
+      font-size: 15px;
+    }
+
+    /* Edit button */
+    .edit-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.1s;
+      font-size: 13px;
+    }
+
+    .info-card:hover .edit-btn {
+      display: flex;
+    }
+
+    .edit-btn:hover {
+      background: var(--primary-light);
+      transform: scale(1.05);
+    }
+
+    /* Rating display */
+    .rating-display {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .rating-stars {
+      display: flex;
+      gap: 3px;
+    }
+
+    .rating-star {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      background: var(--border);
+    }
+
+    .rating-star.filled {
+      background: var(--accent);
+    }
+
+    .rating-label {
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    /* Year-month selector */
+    .ym-select {
+      padding: 6px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-size: 15px;
+      font-family: 'Noto Sans JP', sans-serif;
+      color: var(--text);
+      background: white;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .ym-select:focus {
+      border-color: var(--accent);
+    }
+
+    .ym-save-btn {
+      padding: 7px 16px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Noto Sans JP', sans-serif;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .ym-save-btn:hover {
+      background: var(--primary-light);
+    }
+
+    /* Year-month selector */
+    .info-card.card-purple {
+      background: #f5f0ff;
+      border-color: #ddd6fe;
+    }
+
+    .info-card.card-red {
+      background: #fff5f5;
+      border-color: #fecaca;
+    }
+
+    /* Card spinner */
+    .card-spinner-overlay {
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 20, 40, 0.5);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: white;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: modalIn 0.2s ease;
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: translateY(-12px) scale(0.98);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    .modal-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .modal-staff-name {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .modal-body {
+      padding: 20px 24px;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* Editor toolbar */
+    .editor-toolbar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-btn {
+      padding: 5px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      background: white;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Noto Sans JP', sans-serif;
+    }
+
+    .toolbar-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .toolbar-btn.bold-btn {
+      font-weight: 900;
+    }
+
+    .color-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 2px solid white;
+      box-shadow: 0 0 0 1.5px var(--border);
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .color-btn:hover {
+      transform: scale(1.15);
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+
+    /* WYSIWYG editor */
+    .wysiwyg-area {
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      min-height: 100px;
+      font-size: 14px;
+      line-height: 1.7;
+      font-family: 'Noto Sans JP', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+      word-break: break-all;
+    }
+
+    .wysiwyg-area:focus {
+      border-color: var(--accent);
+    }
+
+    /* Radio group */
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .radio-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .radio-item:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .radio-item.selected {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .radio-item input {
+      display: none;
+    }
+
+    .radio-circle {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+
+    .radio-item.selected .radio-circle {
+      border-color: var(--accent);
+      background: var(--accent);
+      box-shadow: inset 0 0 0 3px white;
+    }
+
+    .radio-score {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--primary);
+      min-width: 20px;
+    }
+
+    .radio-text {
+      font-size: 15px;
+      color: var(--text);
+    }
+
+    /* Buttons */
+    .btn-primary {
+      padding: 9px 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Noto Sans JP', sans-serif;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-light);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-cancel {
+      padding: 9px 20px;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'Noto Sans JP', sans-serif;
+      transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: var(--success);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+      z-index: 2000;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Loading screen */
+    .loading-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 0;
+      gap: 16px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .loading-screen .spinner {
+      width: 36px;
+      height: 36px;
+      border-width: 4px;
+    }
+
+    /* All staff grid */
+    .all-staff-section {
+      margin-bottom: 40px;
+    }
+
+    .all-staff-name-badge {
+      display: inline-flex;
+      align-items: center;
+      background: var(--primary);
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+
+    /* Divider */
+    .section-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 28px 0;
+    }
+
+    /* Month badge */
+    .month-badge {
+      background: var(--accent-soft);
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 4px;
+      margin-left: 8px;
+    }
+
+    /* Error state */
+    .error-msg {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: 16px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .main-content {
+        padding: 16px;
+      }
+
+      .modal-box {
+        max-height: 100vh;
+        border-radius: 12px;
+      }
+    }
+
+    /* ===== Overview Table ===== */
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      margin-bottom: 32px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+      border: 1px solid var(--border);
+    }
+
+    .overview-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    .overview-table thead {
+      /* overflow-x:auto のラッパー内では sticky が正常動作しないため通常ヘッダーとして表示 */
+    }
+
+    .overview-table th {
+      background: var(--primary);
+      color: white;
+      padding: 11px 14px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      border-right: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .overview-table th:last-child {
+      border-right: none;
+    }
+
+    .overview-table th.col-head-red {
+      background: #9b1c1c;
+    }
+
+    .overview-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+
+    .overview-table tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    .overview-table tbody tr:hover {
+      background: #f0f9ff;
+    }
+
+    /* スタッフ名セル */
+    .cell-staff {
+      padding: 10px 14px;
+      vertical-align: middle;
+      white-space: nowrap;
+      background: var(--accent-soft);
+      border-right: 2px solid var(--accent);
+      position: sticky;
+      left: 0;
+      z-index: 2;
+    }
+
+    .staff-name-cell {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    /* 対象年月セル */
+    .cell-ym {
+      padding: 8px 12px;
+      vertical-align: middle;
+      text-align: center;
+      white-space: nowrap;
+      border-right: 1px solid var(--border);
+    }
+
+    /* コンテンツセル */
+    .cell-content-td {
+      padding: 8px 12px;
+      vertical-align: top;
+      cursor: pointer;
+      border-right: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+
+    .cell-content-td:last-child {
+      border-right: none;
+    }
+
+    .cell-content-td:hover {
+      background: var(--accent-soft);
+    }
+
+    .cell-content-td.cell-red {
+      background: #fff8f8;
+    }
+
+    .cell-content-td.cell-red:hover {
+      background: #fee2e2;
+    }
+
+    /* セル内テキスト（行数制限＋スクロール） */
+    .cell-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text);
+      max-height: 72px;
+      overflow-y: auto;
+      word-break: break-all;
+      min-width: 180px;
+    }
+
+    .cell-empty {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-style: italic;
+      min-width: 120px;
+    }
+
+    /* 月バッジ（テーブル内） */
+    .month-badge-inline {
+      display: inline-block;
+      background: var(--accent-soft);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header class="app-header">
+    <h1>🏥 臨床工学科　業務目標・スキルアップシート</h1>
+    <span style="font-size:12px;opacity:0.6;font-family:'Inter',sans-serif;">りんくう総合医療センター</span>
+  </header>
+
+  <!-- Tab bar -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('personal')">👤 個人ページ</button>
+    <button class="tab-btn" onclick="switchTab('all')">👥 全員一覧</button>
+  </div>
+
+  <!-- Main content -->
+  <div class="main-content">
+
+    <!-- ===== 個人ページ ===== -->
+    <div id="page-personal">
+      <!-- Staff selector -->
+      <div class="staff-selector-bar">
+        <label>スタッフ選択：</label>
+        <select class="staff-select" id="staff-select" onchange="onStaffChange()">
+          <option value="">読み込み中...</option>
+        </select>
+      </div>
+
+      <div id="personal-content">
+        <div class="loading-screen">
+          <div class="spinner"></div>
+          <span>データを読み込んでいます...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 全員一覧ページ ===== -->
+    <div id="page-all" style="display:none;">
+      <div id="all-content">
+        <div class="loading-screen">
+          <div class="spinner"></div>
+          <span>データを読み込んでいます...</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="modal-title">編集</div>
+          <div class="modal-staff-name" id="modal-staff-name"></div>
+        </div>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <!-- dynamic content -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal()">キャンセル</button>
+        <button class="btn-primary" onclick="saveEdit()">💾 保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">✅ 更新しました！</div>
+
+  <script>
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxDDrgFFmZduIszcuMth_n9Mcqos36LJs7xKUVRk8jwpfrTCIhLAJtPLIS1O-Y5TmRc/exec';
+
+    const RATING_OPTIONS = [
+      { value: '4', label: '完全に一人でできた' },
+      { value: '3', label: 'ほぼできた（少しの助言で完了）' },
+      { value: '2', label: '指導者の指示のもと実施した' },
+      { value: '1', label: '実施する機会がなかった・できなかった' },
+    ];
+
+    const ANNUAL_FIELDS = ['今年度の目標', '今年度の振り返り', '部門長コメント'];
+    const MONTHLY_FIELDS = [
+      '今月のターゲット業務', '具体的な到達目標', '行動計画',
+      '自己評価', '自己振り返り', '来月の課題・アクション',
+      '指導者評価', '指導者コメント', '指導者氏名'
+    ];
+    const RATING_FIELDS = ['自己評価', '指導者評価'];
+    const READONLY_FIELDS = [];
+    const PURPLE_BG_FIELDS = ['自己評価', '自己振り返り', '来月の課題・アクション'];
+    const RED_BG_FIELDS = ['部門長コメント', '指導者評価', '指導者コメント', '指導者氏名'];
+
+    // Fields that department head edits (no staff edit)
+    const DEPT_HEAD_FIELDS = ['部門長コメント'];
+
+    // State
+    let allData = { annual: {}, monthly: {} };
+    let staffList = [];
+    let currentEdit = null; // { sheet, staffKey, field }
+    let currentTab = 'personal';
+    let currentStaff = '';
+
+    // ===== Init =====
+    async function init() {
+      await Promise.all([
+        fetchSheet('年度目標'),
+        fetchSheet('月間'),
+      ]);
+      populateStaffSelect();
+      renderPersonal();
+    }
+
+    async function fetchSheet(sheetName) {
+      try {
+        const res = await fetch(`${GAS_URL}?sheet=${encodeURIComponent(sheetName)}`);
+        const json = await res.json();
+        if (json.error) throw new Error(json.error);
+        if (sheetName === '年度目標') {
+          allData.annual = json.data || {};
+          staffList = json.staffList || [];
+        } else {
+          allData.monthly = json.data || {};
+        }
+      } catch (e) {
+        console.error('fetchSheet error:', sheetName, e);
+      }
+    }
+
+    function populateStaffSelect() {
+      const sel = document.getElementById('staff-select');
+      sel.innerHTML = '';
+      if (staffList.length === 0) {
+        sel.innerHTML = '<option>スタッフが見つかりません</option>';
+        return;
+      }
+      staffList.forEach((key, i) => {
+        const name = getDisplayName(key);
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.textContent = name;
+        sel.appendChild(opt);
+        if (i === 0) currentStaff = key;
+      });
+    }
+
+    function formatYearMonth(ym) {
+      if (!ym) return '';
+      const s = String(ym);
+      // "2026-04" or "2026/04" 形式
+      const m1 = s.match(/^(\d{4})[\/\-](\d{1,2})$/);
+      if (m1) return `${m1[1]}年${parseInt(m1[2])}月`;
+      // ISO日付文字列 "2026-03-31T..." 形式（スプシが日付型で保存した場合）
+      const m2 = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-]\d/);
+      if (m2) return `${m2[1]}年${parseInt(m2[2])}月`;
+      return s;
+    }
+
+    // 年月から月番号を択き、極煙いHSL背景色を返す
+    function getMonthBgColor(ym) {
+      if (!ym) return '';
+      const s = String(ym);
+      const m = s.match(/(\d{4})[\/\-](\d{1,2})/);
+      if (!m) return '';
+      const month = parseInt(m[2]);
+      // 月ごとの極煙い淡色パレット（1月～12月）
+      const colors = [
+        '',
+        'hsl(210,80%,96%)',   // 1月 淡青
+        'hsl(340,80%,96%)',   // 2月 淡ピンク
+        'hsl(140,70%,95%)',   // 3月 淡緑
+        'hsl(275,65%,96%)',   // 4月 淡紫
+        'hsl(90,75%,94%)',    // 5月 淡黄緑
+        'hsl(52,85%,93%)',    // 6月 淡黄
+        'hsl(25,85%,94%)',    // 7月 淡橙
+        'hsl(5,70%,96%)',     // 8月 淡赤
+        'hsl(178,65%,94%)',   // 9月 淡ティール
+        'hsl(240,65%,96%)',   // 10月 淡藍
+        'hsl(38,80%,93%)',    // 11月 淡アンバー
+        'hsl(258,65%,96%)',   // 12月 淡處
+      ];
+      return colors[month] || '';
+    }
+
+    function getDisplayName(staffKey) {
+      // 氏名フィールドがあればそれを優先
+      const annualData = allData.annual[staffKey] || {};
+      if (annualData['氏名'] && annualData['氏名'].trim()) return annualData['氏名'];
+      return staffKey.replace('staff_', '');
+    }
+
+    function onYearMonthChange(staffKey) {
+      // プレビュー更新（即時保存はしない）
+    }
+
+    async function saveYearMonth(staffKey) {
+      const yearEl = document.getElementById(`ym-year-${staffKey}`);
+      const monthEl = document.getElementById(`ym-month-${staffKey}`);
+      if (!yearEl || !monthEl) return;
+      const year = yearEl.value;
+      const month = String(monthEl.value).padStart(2, '0');
+      const value = `${year}-${month}`;
+
+      // 年月変更の確認ダイアログ
+      const confirmed = window.confirm('自己評価欄と指導者評価欄は白紙になります。\nよろしいですか？');
+      if (!confirmed) return;
+
+      // 月間シートの2段目・3段目（クリア対象フィールド）
+      const CLEAR_FIELDS = [
+        '自己評価', '自己振り返り', '来月の課題・アクション',
+        '指導者評価', '指導者コメント', '指導者氏名'
+      ];
+
+      // ローカルデータを先に更新
+      if (!allData.monthly[staffKey]) allData.monthly[staffKey] = {};
+      allData.monthly[staffKey]['対象年月'] = value;
+      CLEAR_FIELDS.forEach(field => {
+        allData.monthly[staffKey][field] = '';
+      });
+
+      try {
+        // 対象年月の保存と各フィールドのクリアを並行実行
+        const requests = [
+          fetch(GAS_URL, {
+            method: 'POST',
+            body: JSON.stringify({ sheet: '月間', staffKey, field: '対象年月', value }),
+          }),
+          ...CLEAR_FIELDS.map(field =>
+            fetch(GAS_URL, {
+              method: 'POST',
+              body: JSON.stringify({ sheet: '月間', staffKey, field, value: '' }),
+            })
+          )
+        ];
+        const responses = await Promise.all(requests);
+        for (const res of responses) {
+          const json = await res.json();
+          if (json.error) throw new Error(json.error);
+        }
+        showToast('✅ 対象年月を更新しました！');
+        renderPersonal();
+      } catch (e) {
+        showToast('❌ 保存に失敗しました', true);
+        console.error(e);
+      }
+    }
+
+    // ===== Tab switching =====
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab-btn').forEach((b, i) => {
+        b.classList.toggle('active', (i === 0 && tab === 'personal') || (i === 1 && tab === 'all'));
+      });
+      document.getElementById('page-personal').style.display = tab === 'personal' ? '' : 'none';
+      document.getElementById('page-all').style.display = tab === 'all' ? '' : 'none';
+      if (tab === 'all') renderAll();
+    }
+
+    function onStaffChange() {
+      const sel = document.getElementById('staff-select');
+      currentStaff = sel.value;
+      renderPersonal();
+    }
+
+    // ===== Render Personal =====
+    function renderPersonal() {
+      const container = document.getElementById('personal-content');
+      if (!currentStaff) {
+        container.innerHTML = '<div class="loading-screen"><span>スタッフを選択してください</span></div>';
+        return;
+      }
+      const annualData = allData.annual[currentStaff] || {};
+      const monthlyData = allData.monthly[currentStaff] || {};
+      const displayName = getDisplayName(currentStaff);
+
+      let html = '';
+
+      // ---- 年度目標セクション ----
+      html += `
+    <div class="section-header">
+      <span class="section-badge">ANNUAL</span>
+      <span class="section-title">年度業務目標管理</span>
+      <span class="section-year">${displayName}</span>
+    </div>
+    <div class="cards-grid cards-grid-wide">
+  `;
+      ANNUAL_FIELDS.forEach(field => {
+        const val = annualData[field] || '';
+        const isReadonly = READONLY_FIELDS.includes(field);
+        html += buildCard('年度目標', currentStaff, field, val, displayName, isReadonly);
+      });
+      html += '</div>';
+
+      // ---- 月間シートセクション ----
+      const yearMonth = monthlyData['対象年月'] || '';
+      const yearMonthLabel = formatYearMonth(yearMonth);
+      // 年・月の初期値を分解
+      const ymMatch = String(yearMonth).match(/(\d{4})[\/\-](\d{1,2})/);
+      const initYear = ymMatch ? ymMatch[1] : new Date().getFullYear();
+      const initMonth = ymMatch ? parseInt(ymMatch[2]) : new Date().getMonth() + 1;
+
+      // 年の選択肢（当年から3年先まで: 2025を除外し2029を含む）
+      const thisYear = new Date().getFullYear();
+      let yearOptions = '';
+      for (let y = thisYear; y <= thisYear + 3; y++) {
+        yearOptions += `<option value="${y}" ${y == initYear ? 'selected' : ''}>${y}年</option>`;
+      }
+      let monthOptions = '';
+      for (let mo = 1; mo <= 12; mo++) {
+        monthOptions += `<option value="${mo}" ${mo === initMonth ? 'selected' : ''}>${mo}月</option>`;
+      }
+
+      html += `
+    <div class="section-divider"></div>
+    <div class="section-header" style="flex-wrap:wrap;gap:8px;">
+      <span class="section-badge">MONTHLY</span>
+      <span class="section-title">業務標準化・スキルアップ月間シート</span>
+      <div class="ym-selector" style="display:flex;align-items:center;gap:6px;margin-left:auto;">
+        <select id="ym-year-${currentStaff}" class="ym-select" onchange="onYearMonthChange('${currentStaff}')">${yearOptions}</select>
+        <select id="ym-month-${currentStaff}" class="ym-select" onchange="onYearMonthChange('${currentStaff}')">${monthOptions}</select>
+        <button class="ym-save-btn" onclick="saveYearMonth('${currentStaff}')">保存</button>
+      </div>
+    </div>
+    <div class="cards-grid cards-grid-wide">
+  `;
+      MONTHLY_FIELDS.forEach(field => {
+        const val = monthlyData[field] || '';
+        html += buildCard('月間', currentStaff, field, val, displayName, false);
+      });
+      html += '</div>';
+
+      container.innerHTML = html;
+    }
+
+    // ===== Render All（表形式） =====
+    function renderAll() {
+      const container = document.getElementById('all-content');
+      if (staffList.length === 0) {
+        container.innerHTML = '<div class="error-msg">スタッフデータが見つかりません。スプレッドシートを確認してください。</div>';
+        return;
+      }
+
+      let html = '';
+
+      // ---- 年度目標 全員（表形式） ----
+      html += `
+        <div class="section-header">
+          <span class="section-badge">ANNUAL</span>
+          <span class="section-title">年度業務目標管理 — 全員一覧</span>
+        </div>
+        <div class="table-wrapper">
+          <table class="overview-table">
+            <thead>
+              <tr>
+                <th style="min-width:100px;">スタッフ</th>
+                <th style="min-width:200px;">今年度の目標</th>
+                <th style="min-width:200px;">今年度の振り返り</th>
+                <th class="col-head-red" style="min-width:180px;">部門長コメント</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      const ANNUAL_TABLE_FIELDS = ['今年度の目標', '今年度の振り返り', '部門長コメント'];
+
+      staffList.forEach(staffKey => {
+        const annualData = allData.annual[staffKey] || {};
+        const displayName = getDisplayName(staffKey);
+        html += `<tr>`;
+        html += `<td class="cell-staff"><div class="staff-name-cell">👤 ${displayName}</div></td>`;
+        ANNUAL_TABLE_FIELDS.forEach(field => {
+          const val = annualData[field] || '';
+          const isRed = RED_BG_FIELDS.includes(field);
+          const isReadonly = READONLY_FIELDS.includes(field);
+          const clickAttr = isReadonly ? '' : `onclick="openModal('年度目標','${staffKey}','${field}','${displayName}')" title="クリックして編集"`;
+          html += `<td class="cell-content-td ${isRed ? 'cell-red' : ''}" ${clickAttr}>`;
+          html += val
+            ? `<div class="cell-text">${markupToHtml(val)}</div>`
+            : `<div class="cell-empty">未入力</div>`;
+          html += `</td>`;
+        });
+        html += `</tr>`;
+      });
+
+      html += `</tbody></table></div>`;
+
+      html += '<div class="section-divider"></div>';
+
+      // ---- 月間シート 全員（表形式） ----
+      html += `
+        <div class="section-header">
+          <span class="section-badge">MONTHLY</span>
+          <span class="section-title">業務標準化・スキルアップ月間シート — 全員一覧</span>
+        </div>
+        <div class="table-wrapper">
+          <table class="overview-table">
+            <thead>
+              <tr>
+                <th style="min-width:100px;">スタッフ</th>
+                <th style="min-width:80px;">対象年月</th>
+                <th style="min-width:200px;">今月のターゲット業務</th>
+                <th style="min-width:200px;">具体的な到達目標</th>
+                <th style="min-width:200px;">行動計画</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      const MONTHLY_TABLE_FIELDS = ['今月のターゲット業務', '具体的な到達目標', '行動計画'];
+
+      staffList.forEach(staffKey => {
+        const monthlyData = allData.monthly[staffKey] || {};
+        const displayName = getDisplayName(staffKey);
+        const rawYM = monthlyData['対象年月'] || '';
+        const yearMonthLabel = formatYearMonth(rawYM);
+        const rowBg = getMonthBgColor(rawYM);
+        // trに月色を適用（cell-staffは自身の角色を保持）
+        html += `<tr${rowBg ? ` style="background:${rowBg}"` : ''}>`;
+        html += `<td class="cell-staff"><div class="staff-name-cell">👤 ${displayName}</div></td>`;
+        html += `<td class="cell-ym">`;
+        html += yearMonthLabel
+          ? `<span class="month-badge-inline">${yearMonthLabel}</span>`
+          : `<span class="cell-empty">未設定</span>`;
+        html += `</td>`;
+        MONTHLY_TABLE_FIELDS.forEach(field => {
+          const val = monthlyData[field] || '';
+          html += `<td class="cell-content-td" onclick="openModal('月間','${staffKey}','${field}','${displayName}')" title="クリックして編集">`;
+          html += val
+            ? `<div class="cell-text">${markupToHtml(val)}</div>`
+            : `<div class="cell-empty">未入力</div>`;
+          html += `</td>`;
+        });
+        html += `</tr>`;
+      });
+
+      html += `</tbody></table></div>`;
+
+      container.innerHTML = html;
+    }
+
+    // ===== Build Card =====
+    function buildCard(sheet, staffKey, field, value, displayName, isReadonly) {
+      const cardId = `card_${sheet}_${staffKey}_${field}`.replace(/[^a-zA-Z0-9_]/g, '_');
+      const isRating = RATING_FIELDS.includes(field);
+      const isPurple = PURPLE_BG_FIELDS.includes(field);
+      const isRed = RED_BG_FIELDS.includes(field);
+      const bgClass = isPurple ? 'card-purple' : isRed ? 'card-red' : '';
+
+      let contentHtml = '';
+      if (isRating && value) {
+        const score = parseInt(value);
+        const option = RATING_OPTIONS.find(o => o.value === String(score));
+        const starsHtml = [4, 3, 2, 1].map(i =>
+          `<div class="rating-star ${i <= score ? 'filled' : ''}"></div>`
+        ).join('');
+        contentHtml = `
+      <div class="rating-display">
+        <div class="rating-stars">${starsHtml}</div>
+        <span class="rating-label">${score}：${option ? option.label : ''}</span>
+      </div>`;
+      } else if (value) {
+        contentHtml = `<div class="card-content">${markupToHtml(value)}</div>`;
+      } else {
+        contentHtml = `<div class="card-content empty">未入力</div>`;
+      }
+
+      const editBtn = isReadonly ? '' : `
+    <button class="edit-btn" onclick="openModal('${sheet}','${staffKey}','${field}','${displayName}')" title="編集">
+      ✏️
+    </button>`;
+
+      return `
+    <div class="info-card ${bgClass}" id="${cardId}">
+      <div class="card-label"><span class="card-label-dot"></span>${field}</div>
+      ${contentHtml}
+      ${editBtn}
+    </div>`;
+    }
+
+    // ===== Markup conversion =====
+    function markupToHtml(text) {
+      if (!text) return '';
+      let h = String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      h = h.replace(/\[red\](.*?)\[\/red\]/g, '<span style="color:#ef4444;">$1</span>');
+      h = h.replace(/\[blue\](.*?)\[\/blue\]/g, '<span style="color:#3b82f6;">$1</span>');
+      h = h.replace(/\[green\](.*?)\[\/green\]/g, '<span style="color:#22c55e;">$1</span>');
+      h = h.replace(/\[yellow\](.*?)\[\/yellow\]/g, '<span style="color:#f59e0b;">$1</span>');
+      // 実際の改行文字（\r\n, \r, \n）と\\nの両方を<br>に変換
+      h = h.replace(/\\n/g, '<br>');
+      h = h.replace(/\r\n|\r|\n/g, '<br>');
+      return h;
+    }
+
+    function htmlToMarkup(html) {
+      // DOMパーサーで確実に変換
+      const parser = new DOMParser();
+      const doc = parser.parseFromString('<div id="root">' + html + '</div>', 'text/html');
+      const root = doc.getElementById('root');
+
+      function nodeToMarkup(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          return node.textContent;
+        }
+        if (node.nodeType !== Node.ELEMENT_NODE) return '';
+
+        const tag = node.tagName.toLowerCase();
+        const children = Array.from(node.childNodes).map(nodeToMarkup).join('');
+
+        if (tag === 'strong' || tag === 'b') return `**${children}**`;
+        if (tag === 'br') return '\n';
+        if (tag === 'div') return children + '\n';
+
+        if (tag === 'span') {
+          const color = node.style.color || '';
+          // rgb→hex変換対応
+          const hexColor = rgbToHex(color) || color.toLowerCase();
+          if (hexColor === '#ef4444') return `[red]${children}[/red]`;
+          if (hexColor === '#3b82f6') return `[blue]${children}[/blue]`;
+          if (hexColor === '#22c55e') return `[green]${children}[/green]`;
+          if (hexColor === '#f59e0b') return `[yellow]${children}[/yellow]`;
+          return children;
+        }
+
+        return children;
+      }
+
+      function rgbToHex(rgb) {
+        const m = rgb.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+        if (!m) return null;
+        return '#' + [m[1], m[2], m[3]]
+          .map(n => parseInt(n).toString(16).padStart(2, '0'))
+          .join('');
+      }
+
+      const result = Array.from(root.childNodes).map(nodeToMarkup).join('');
+      return result.replace(/\n+$/, '').trim();
+    }
+
+    // ===== Modal =====
+    function openModal(sheet, staffKey, field, displayName) {
+      currentEdit = { sheet, staffKey, field };
+      document.getElementById('modal-title').textContent = field;
+      document.getElementById('modal-staff-name').textContent = displayName + ' さん';
+
+      const isRating = RATING_FIELDS.includes(field);
+      const data = sheet === '年度目標' ? allData.annual[staffKey] : allData.monthly[staffKey];
+      const currentVal = (data && data[field]) ? data[field] : '';
+
+      let bodyHtml = '';
+
+      if (isRating) {
+        bodyHtml = `<div class="radio-group">`;
+        RATING_OPTIONS.forEach(opt => {
+          const isSelected = String(currentVal) === opt.value;
+          bodyHtml += `
+        <label class="radio-item ${isSelected ? 'selected' : ''}" onclick="selectRating(this, '${opt.value}')">
+          <input type="radio" name="rating" value="${opt.value}" ${isSelected ? 'checked' : ''}>
+          <div class="radio-circle"></div>
+          <span class="rating-score">${opt.value}</span>
+          <span class="rating-text">${opt.label}</span>
+        </label>`;
+        });
+        bodyHtml += `</div>`;
+      } else {
+        const currentHtml = markupToHtml(currentVal);
+        bodyHtml = `
+      <div class="editor-toolbar">
+        <button class="toolbar-btn bold-btn" onclick="applyFormat('bold')"><b>B</b> 太字</button>
+        <div class="color-btn" style="background:#ef4444;" title="赤" onclick="applyColor('#ef4444')"></div>
+        <div class="color-btn" style="background:#3b82f6;" title="青" onclick="applyColor('#3b82f6')"></div>
+        <div class="color-btn" style="background:#22c55e;" title="緑" onclick="applyColor('#22c55e')"></div>
+        <div class="color-btn" style="background:#f59e0b;" title="黄" onclick="applyColor('#f59e0b')"></div>
+      </div>
+      <div class="wysiwyg-area" id="wysiwyg-editor" contenteditable="true"
+        onmouseup="saveSelection()" onkeyup="saveSelection()">${currentHtml}</div>`;
+      }
+
+      document.getElementById('modal-body').innerHTML = bodyHtml;
+      document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('open');
+      currentEdit = null;
+    }
+
+    function selectRating(el, value) {
+      document.querySelectorAll('.radio-item').forEach(r => r.classList.remove('selected'));
+      el.classList.add('selected');
+      el.querySelector('input').checked = true;
+    }
+
+    // 選択範囲を保存する
+    let savedRange = null;
+
+    function saveSelection() {
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        savedRange = sel.getRangeAt(0).cloneRange();
+      }
+    }
+
+    function restoreSelection() {
+      const editor = document.getElementById('wysiwyg-editor');
+      if (!editor) return;
+      editor.focus();
+      if (savedRange) {
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(savedRange);
+      }
+    }
+
+    function applyFormat(cmd) {
+      restoreSelection();
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
+      const range = sel.getRangeAt(0);
+      const selectedText = range.toString();
+      if (!selectedText) return;
+
+      if (cmd === 'bold') {
+        // 既に<strong>で囲まれているか判定
+        const parentEl = range.commonAncestorContainer.parentElement;
+        if (parentEl && parentEl.tagName === 'STRONG') {
+          // 解除
+          const text = document.createTextNode(parentEl.textContent);
+          parentEl.replaceWith(text);
+        } else {
+          const strong = document.createElement('strong');
+          strong.textContent = selectedText;
+          range.deleteContents();
+          range.insertNode(strong);
+        }
+      }
+      savedRange = null;
+    }
+
+    function applyColor(color) {
+      restoreSelection();
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
+      const range = sel.getRangeAt(0);
+      const selectedText = range.toString();
+      if (!selectedText) return;
+
+      const span = document.createElement('span');
+      span.style.color = color;
+      span.textContent = selectedText;
+      range.deleteContents();
+      range.insertNode(span);
+      savedRange = null;
+    }
+
+    // ===== Save =====
+    async function saveEdit() {
+      if (!currentEdit) return;
+      const { sheet, staffKey, field } = currentEdit;
+      const isRating = RATING_FIELDS.includes(field);
+
+      let value = '';
+      if (isRating) {
+        const selected = document.querySelector('.radio-item.selected input');
+        value = selected ? selected.value : '';
+      } else {
+        const editor = document.getElementById('wysiwyg-editor');
+        value = editor ? htmlToMarkup(editor.innerHTML) : '';
+      }
+
+      closeModal();
+
+      // Update local state immediately
+      if (sheet === '年度目標') {
+        if (!allData.annual[staffKey]) allData.annual[staffKey] = {};
+        allData.annual[staffKey][field] = value;
+      } else {
+        if (!allData.monthly[staffKey]) allData.monthly[staffKey] = {};
+        allData.monthly[staffKey][field] = value;
+      }
+
+      // Show spinner on card
+      const cardId = `card_${sheet}_${staffKey}_${field}`.replace(/[^a-zA-Z0-9_]/g, '_');
+      const card = document.getElementById(cardId);
+      if (card) {
+        card.classList.add('loading-card');
+        card.innerHTML += `<div class="card-spinner-overlay"><div class="spinner"></div></div>`;
+      }
+
+      try {
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ sheet, staffKey, field, value }),
+        });
+        const json = await res.json();
+        if (json.error) throw new Error(json.error);
+        showToast('✅ 更新しました！');
+      } catch (e) {
+        showToast('❌ 保存に失敗しました', true);
+        console.error(e);
+      }
+
+      // Re-render
+      if (currentTab === 'personal') {
+        renderPersonal();
+      } else {
+        renderAll();
+      }
+    }
+
+    // ===== Toast =====
+    function showToast(msg, isError = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.background = isError ? '#dc2626' : 'var(--success)';
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // ===== Start =====
+    init();
+  </script>
+</body>
+
+</html>
