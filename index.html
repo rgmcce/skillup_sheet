@@ -832,6 +832,41 @@
       border-radius: 4px;
       white-space: nowrap;
     }
+
+    /* ===== 全員一覧 内部タブ ===== */
+    .inner-tab-bar {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0;
+    }
+
+    .inner-tab-btn {
+      padding: 9px 22px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+      font-family: 'Noto Sans JP', sans-serif;
+      border-radius: 6px 6px 0 0;
+    }
+
+    .inner-tab-btn:hover {
+      color: var(--primary);
+      background: var(--accent-soft);
+    }
+
+    .inner-tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary-light);
+      background: var(--accent-soft);
+    }
   </style>
 </head>
 
@@ -872,7 +907,20 @@
 
     <!-- ===== 全員一覧ページ ===== -->
     <div id="page-all" style="display:none;">
-      <div id="all-content">
+      <!-- 全員一覧 内部タブ -->
+      <div class="inner-tab-bar">
+        <button class="inner-tab-btn active" id="all-tab-monthly" onclick="switchAllTab('monthly')">📅 月間シート</button>
+        <button class="inner-tab-btn" id="all-tab-annual" onclick="switchAllTab('annual')">📋 年度目標</button>
+      </div>
+      <!-- 月間シートペイン（デフォルト表示） -->
+      <div id="all-monthly-pane">
+        <div class="loading-screen">
+          <div class="spinner"></div>
+          <span>データを読み込んでいます...</span>
+        </div>
+      </div>
+      <!-- 年度目標ペイン -->
+      <div id="all-annual-pane" style="display:none;">
         <div class="loading-screen">
           <div class="spinner"></div>
           <span>データを読み込んでいます...</span>
@@ -981,22 +1029,36 @@
     function formatYearMonth(ym) {
       if (!ym) return '';
       const s = String(ym);
-      // "2026-04" or "2026/04" 形式
+      // "2026-04" or "2026/04" 形式（YYYY-MM のみ）
       const m1 = s.match(/^(\d{4})[\/\-](\d{1,2})$/);
       if (m1) return `${m1[1]}年${parseInt(m1[2])}月`;
-      // ISO日付文字列 "2026-03-31T..." 形式（スプシが日付型で保存した場合）
-      const m2 = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-]\d/);
-      if (m2) return `${m2[1]}年${parseInt(m2[2])}月`;
+      // ISO日付文字列 "2026-03-31T15:00:00Z" 形式（スプシが日付型で保存した場合）
+      // → new Date() のローカル時刻（JST）で取得することで UTC/JST のズレを防ぐ
+      const d = new Date(s);
+      if (!isNaN(d.getTime())) {
+        return `${d.getFullYear()}年${d.getMonth() + 1}月`;
+      }
       return s;
     }
 
-    // 年月から月番号を択き、極煙いHSL背景色を返す
+    // 年月から月番号を取り、淡いHSL背景色を返す
     function getMonthBgColor(ym) {
       if (!ym) return '';
       const s = String(ym);
-      const m = s.match(/(\d{4})[\/\-](\d{1,2})/);
-      if (!m) return '';
-      const month = parseInt(m[2]);
+      // "YYYY-MM" 形式
+      const m1 = s.match(/^(\d{4})[\/\-](\d{1,2})$/);
+      let month;
+      if (m1) {
+        month = parseInt(m1[2]);
+      } else {
+        // ISO日付文字列 → Dateオブジェクトのローカル時刻（JST）で月を取得
+        const d = new Date(s);
+        if (!isNaN(d.getTime())) {
+          month = d.getMonth() + 1;
+        } else {
+          return '';
+        }
+      }
       // 月ごとの極煙い淡色パレット（1月～12月）
       const colors = [
         '',
@@ -1079,7 +1141,7 @@
       }
     }
 
-    // ===== Tab switching =====
+    // ===== Tab switching（メインタブ） =====
     function switchTab(tab) {
       currentTab = tab;
       document.querySelectorAll('.tab-btn').forEach((b, i) => {
@@ -1088,6 +1150,14 @@
       document.getElementById('page-personal').style.display = tab === 'personal' ? '' : 'none';
       document.getElementById('page-all').style.display = tab === 'all' ? '' : 'none';
       if (tab === 'all') renderAll();
+    }
+
+    // ===== 全員一覧 内部タブ切り替え =====
+    function switchAllTab(tab) {
+      document.getElementById('all-tab-monthly').classList.toggle('active', tab === 'monthly');
+      document.getElementById('all-tab-annual').classList.toggle('active', tab === 'annual');
+      document.getElementById('all-monthly-pane').style.display = tab === 'monthly' ? '' : 'none';
+      document.getElementById('all-annual-pane').style.display = tab === 'annual' ? '' : 'none';
     }
 
     function onStaffChange() {
@@ -1166,62 +1236,20 @@
       container.innerHTML = html;
     }
 
-    // ===== Render All（表形式） =====
+    // ===== Render All（表形式・タブ別） =====
     function renderAll() {
-      const container = document.getElementById('all-content');
+      const monthlyPane = document.getElementById('all-monthly-pane');
+      const annualPane = document.getElementById('all-annual-pane');
+
       if (staffList.length === 0) {
-        container.innerHTML = '<div class="error-msg">スタッフデータが見つかりません。スプレッドシートを確認してください。</div>';
+        const errHtml = '<div class="error-msg">スタッフデータが見つかりません。スプレッドシートを確認してください。</div>';
+        monthlyPane.innerHTML = errHtml;
+        annualPane.innerHTML = errHtml;
         return;
       }
 
-      let html = '';
-
-      // ---- 年度目標 全員（表形式） ----
-      html += `
-        <div class="section-header">
-          <span class="section-badge">ANNUAL</span>
-          <span class="section-title">年度業務目標管理 — 全員一覧</span>
-        </div>
-        <div class="table-wrapper">
-          <table class="overview-table">
-            <thead>
-              <tr>
-                <th style="min-width:100px;">スタッフ</th>
-                <th style="min-width:200px;">今年度の目標</th>
-                <th style="min-width:200px;">今年度の振り返り</th>
-                <th class="col-head-red" style="min-width:180px;">部門長コメント</th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
-
-      const ANNUAL_TABLE_FIELDS = ['今年度の目標', '今年度の振り返り', '部門長コメント'];
-
-      staffList.forEach(staffKey => {
-        const annualData = allData.annual[staffKey] || {};
-        const displayName = getDisplayName(staffKey);
-        html += `<tr>`;
-        html += `<td class="cell-staff"><div class="staff-name-cell">👤 ${displayName}</div></td>`;
-        ANNUAL_TABLE_FIELDS.forEach(field => {
-          const val = annualData[field] || '';
-          const isRed = RED_BG_FIELDS.includes(field);
-          const isReadonly = READONLY_FIELDS.includes(field);
-          const clickAttr = isReadonly ? '' : `onclick="openModal('年度目標','${staffKey}','${field}','${displayName}')" title="クリックして編集"`;
-          html += `<td class="cell-content-td ${isRed ? 'cell-red' : ''}" ${clickAttr}>`;
-          html += val
-            ? `<div class="cell-text">${markupToHtml(val)}</div>`
-            : `<div class="cell-empty">未入力</div>`;
-          html += `</td>`;
-        });
-        html += `</tr>`;
-      });
-
-      html += `</tbody></table></div>`;
-
-      html += '<div class="section-divider"></div>';
-
       // ---- 月間シート 全員（表形式） ----
-      html += `
+      let monthlyHtml = `
         <div class="section-header">
           <span class="section-badge">MONTHLY</span>
           <span class="section-title">業務標準化・スキルアップ月間シート — 全員一覧</span>
@@ -1248,28 +1276,70 @@
         const rawYM = monthlyData['対象年月'] || '';
         const yearMonthLabel = formatYearMonth(rawYM);
         const rowBg = getMonthBgColor(rawYM);
-        // trに月色を適用（cell-staffは自身の角色を保持）
-        html += `<tr${rowBg ? ` style="background:${rowBg}"` : ''}>`;
-        html += `<td class="cell-staff"><div class="staff-name-cell">👤 ${displayName}</div></td>`;
-        html += `<td class="cell-ym">`;
-        html += yearMonthLabel
+        // trに月色を適用
+        monthlyHtml += `<tr${rowBg ? ` style="background:${rowBg}"` : ''}>`;
+        monthlyHtml += `<td class="cell-staff"><div class="staff-name-cell">👤 ${displayName}</div></td>`;
+        monthlyHtml += `<td class="cell-ym">`;
+        monthlyHtml += yearMonthLabel
           ? `<span class="month-badge-inline">${yearMonthLabel}</span>`
           : `<span class="cell-empty">未設定</span>`;
-        html += `</td>`;
+        monthlyHtml += `</td>`;
         MONTHLY_TABLE_FIELDS.forEach(field => {
           const val = monthlyData[field] || '';
-          html += `<td class="cell-content-td" onclick="openModal('月間','${staffKey}','${field}','${displayName}')" title="クリックして編集">`;
-          html += val
+          monthlyHtml += `<td class="cell-content-td" onclick="openModal('月間','${staffKey}','${field}','${displayName}')" title="クリックして編集">`;
+          monthlyHtml += val
             ? `<div class="cell-text">${markupToHtml(val)}</div>`
             : `<div class="cell-empty">未入力</div>`;
-          html += `</td>`;
+          monthlyHtml += `</td>`;
         });
-        html += `</tr>`;
+        monthlyHtml += `</tr>`;
       });
 
-      html += `</tbody></table></div>`;
+      monthlyHtml += `</tbody></table></div>`;
+      monthlyPane.innerHTML = monthlyHtml;
 
-      container.innerHTML = html;
+      // ---- 年度目標 全員（表形式） ----
+      let annualHtml = `
+        <div class="section-header">
+          <span class="section-badge">ANNUAL</span>
+          <span class="section-title">年度業務目標管理 — 全員一覧</span>
+        </div>
+        <div class="table-wrapper">
+          <table class="overview-table">
+            <thead>
+              <tr>
+                <th style="min-width:100px;">スタッフ</th>
+                <th style="min-width:200px;">今年度の目標</th>
+                <th style="min-width:200px;">今年度の振り返り</th>
+                <th class="col-head-red" style="min-width:180px;">部門長コメント</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      const ANNUAL_TABLE_FIELDS = ['今年度の目標', '今年度の振り返り', '部門長コメント'];
+
+      staffList.forEach(staffKey => {
+        const annualData = allData.annual[staffKey] || {};
+        const displayName = getDisplayName(staffKey);
+        annualHtml += `<tr>`;
+        annualHtml += `<td class="cell-staff"><div class="staff-name-cell">👤 ${displayName}</div></td>`;
+        ANNUAL_TABLE_FIELDS.forEach(field => {
+          const val = annualData[field] || '';
+          const isRed = RED_BG_FIELDS.includes(field);
+          const isReadonly = READONLY_FIELDS.includes(field);
+          const clickAttr = isReadonly ? '' : `onclick="openModal('年度目標','${staffKey}','${field}','${displayName}')" title="クリックして編集"`;
+          annualHtml += `<td class="cell-content-td ${isRed ? 'cell-red' : ''}" ${clickAttr}>`;
+          annualHtml += val
+            ? `<div class="cell-text">${markupToHtml(val)}</div>`
+            : `<div class="cell-empty">未入力</div>`;
+          annualHtml += `</td>`;
+        });
+        annualHtml += `</tr>`;
+      });
+
+      annualHtml += `</tbody></table></div>`;
+      annualPane.innerHTML = annualHtml;
     }
 
     // ===== Build Card =====
