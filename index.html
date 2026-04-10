@@ -1199,9 +1199,28 @@
       const yearMonth = monthlyData['対象年月'] || '';
       const yearMonthLabel = formatYearMonth(yearMonth);
       // 年・月の初期値を分解
-      const ymMatch = String(yearMonth).match(/(\d{4})[\/\-](\d{1,2})/);
-      const initYear = ymMatch ? ymMatch[1] : new Date().getFullYear();
-      const initMonth = ymMatch ? parseInt(ymMatch[2]) : new Date().getMonth() + 1;
+      // ISO日付文字列（例: 2026-03-31T15:00:00Z）はDateオブジェクトのローカル時刻（JST）で取得し
+      // UTC/JSTのズレによる月のズレを防ぐ
+      let initYear, initMonth;
+      const ymSimple = String(yearMonth).match(/^(\d{4})[\/\-](\d{1,2})$/);
+      if (ymSimple) {
+        // "YYYY-MM" 形式はそのまま使用
+        initYear = parseInt(ymSimple[1]);
+        initMonth = parseInt(ymSimple[2]);
+      } else if (yearMonth) {
+        // ISO日付文字列 → Dateオブジェクトのローカル時刻（JST）で年・月を取得
+        const d = new Date(yearMonth);
+        if (!isNaN(d.getTime())) {
+          initYear = d.getFullYear();
+          initMonth = d.getMonth() + 1;
+        } else {
+          initYear = new Date().getFullYear();
+          initMonth = new Date().getMonth() + 1;
+        }
+      } else {
+        initYear = new Date().getFullYear();
+        initMonth = new Date().getMonth() + 1;
+      }
 
       // 年の選択肢（当年から3年先まで: 2025を除外し2029を含む）
       const thisYear = new Date().getFullYear();
